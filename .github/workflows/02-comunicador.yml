@@ -28,14 +28,34 @@ on:
         required: false
         type: string
         default: "La misión fue un éxito, nos vemos en el inframundo"
-
-
+      cow-character:
+        description: "Personaje que enviará el mensaje"
+        required: false
+        type: choice
+        default: "eyes"
+        options:
+          - tux
+          - ghostbusters
+          - dragon
+          - stegosaurus
+          - daemon
+          - cheese
+          - hellokitty
+          - ren
+          - bong
+          - beavis
 
 jobs:
   send-message:
     runs-on: ubuntu-latest
 
     steps:
+      - name: instalar emisor de la legion
+        run: |
+          echo "instalar emisor de la legion"
+          sudo apt-get update
+          sudo apt-get install -y cowsay
+
       - name: Enviando mensaje a la legión
         run: |
           echo "Desde la base oculta de la legión del mal"
@@ -44,7 +64,7 @@ jobs:
           echo "Prioridad: ${{inputs.prioridad}}"
           echo ""
           echo "Mensaje:"
-          echo "${{inputs.mensaje}}"
+          cowsay -f ${{inputs.cow-character}} "${{inputs.mensaje}}"
           echo ""
-          echo "Fin del comunicado"
+          echo "---- ${{inputs.villano}}"
       
