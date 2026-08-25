@@ -14,6 +14,21 @@ on:
           - Magneto
           - Loki
           - Venom
+      prioridad:
+        description: "Nivel de prioridad de la misión"
+        required: true
+        type: choice
+        options:
+          - baja
+          - media
+          - alta
+          - critica
+      mensaje:
+        description: "Mensaje o directiva para la legión"
+        required: false
+        type: string
+        default: "La misión fue un éxito, nos vemos en el inframundo"
+
 
 
 jobs:
@@ -21,4 +36,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Enviando mensaje a la legión
+        run: |
+          echo "Desde la base oculta de la legión del mal"
+          echo "El villano ${{inputs.villano}} nos informa:"
+          echo ""
+          echo "Prioridad: ${{inputs.prioridad}}"
+          echo ""
+          echo "Mensaje:"
+          echo "${{inputs.mensaje}}"
+          echo ""
+          echo "Fin del comunicado"
+      
