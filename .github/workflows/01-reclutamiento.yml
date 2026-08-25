@@ -21,4 +21,16 @@ jobs:
           echo ""
           echo "Nombre del repo: ${{github.repository}}"
           echo "Commit: ${{github.sha}}"
-          echo "Metadata: ${{toJson(github)}}"
+      
+      - name: Capcidades del agente
+        run: |
+          echo "Sistema operativo"
+          uname -a
+          echo ""
+          echo "Info del CPU"
+          lscpu | head
+          echo ""
+          echo "Memoria disponible"
+          free -h | head -3
+          echo "Version Node"
+          node --version
