@@ -11,3 +11,14 @@ jobs:
 
       - name: El agente se presenta
         run: echo "Hola, soy Horacio, tu agente de reclutamiento"
+      - name: Reporte de identidad
+        run: |
+          echo "Reporte de identidad"
+          echo "===================="
+          echo ""
+          echo "Nombre clave: ${{github.actor}}"
+          echo "Identificador del job: ${{github.job}}"
+          echo ""
+          echo "Nombre del repo: ${{github.repository}}"
+          echo "Commit: ${{github.sha}}"
+          echo "Metadata: ${{toJson(github)}}"
