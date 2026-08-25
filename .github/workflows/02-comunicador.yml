@@ -1,0 +1,24 @@
+
+name: Comunicador de la legion
+
+on:
+  workflow_dispatch:
+    inputs:
+      villano:
+        description: "Nombre del villano que envia mensaje?"
+        required: true
+        type: choice
+        options:
+          - Joker
+          - Thanos
+          - Magneto
+          - Loki
+          - Venom
+
+
+jobs:
+  send-message:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
