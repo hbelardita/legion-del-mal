@@ -1,0 +1,19 @@
+name: Control de Calidad
+on:
+  push:
+    branches: [main]
+  pull_request: 
+    branches: [main]
+
+
+jobs:
+  revision-calidad:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Accede al repositorio
+        uses: actions/checkout@v4
+
+      - name: Revisa los cambios
+        run: |
+          chmod +x scripts/validar.sh
+          bash scripts/validar.sh
