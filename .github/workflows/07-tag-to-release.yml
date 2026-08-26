@@ -1,0 +1,91 @@
+# ============================================
+# WORKFLOW: TAG → RELEASE AUTOMÁTICO
+# ============================================
+# Al hacer push de un tag v*, crea un GitHub Release
+# con los commits incluidos y un changelog generado.
+# ============================================
+
+name: "🦹 Tag to Release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  crear-release:
+    name: "Crear Release"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "📥 Checkout del código"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para generar el changelog completo
+
+      - name: "📋 Obtener changelog desde el último tag"
+        id: changelog
+        run: |
+          # Obtener el tag anterior (si existe)
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "📌 Primer tag del repositorio — incluyendo todos los commits"
+            RANGE="HEAD"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "$RANGE")
+          else
+            echo "📌 Changelog desde $PREV_TAG hasta $GITHUB_REF_NAME"
+            RANGE="${PREV_TAG}..HEAD"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "$RANGE")
+          fi
+
+          # Guardar en multiline output
+          {
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "### Commits incluidos en este release:" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "$CHANGELOG" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "📊 Resumen de cambios"
+        run: |
+          echo "## 🦹 Release ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Estadísticas:" >> "$GITHUB_STEP_SUMMARY"
+          git log --pretty=format:"- %s" HEAD | wc -l | xargs -I {} echo "- **Total de commits:** {}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tag:** \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Autor del tag:** ${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Fecha:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "🚀 Crear GitHub Release"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "🦹 ${{ github.ref_name }} — Operación completada"
+          body: |
+            ## ${{ github.ref_name }}
+
+            **Tagged by:** ${{ github.actor }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ---
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ---
+
+            > _"Los datos no mienten. Los seres orgánicos sí."_ — Brainiac
+
+            ### Enemigos derrotados en esta versión:
+            <!-- Agrega aquí los issues cerrados o features destacados -->
+            - [ ] Verificar que todos los planes de escape funcionan
+          draft: false
+          prerelease: false
+          generate_release_notes: true
